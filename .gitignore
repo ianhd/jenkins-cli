@@ -1,1 +1,13 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Environment files
 .env
+
+# Virtual environment
+venv/
+*.venv/
+
+# Other
+.DS_Store
