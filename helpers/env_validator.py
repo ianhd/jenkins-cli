@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-def validate_env():
+def validate_and_load_env():
     env_path = ".env"
 
     # Check if the .env file exists
