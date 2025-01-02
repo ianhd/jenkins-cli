@@ -139,6 +139,8 @@ def render_progress_bar(percentage, width=50):
     bar = f"[{'#' * completed}{'.' * remaining}] {percentage:.2f}%"
     return bar
 
+# git push test
+
 def monitor_build(location, build_number):
     print(f"⏳ monitoring build status from {location}")
     
