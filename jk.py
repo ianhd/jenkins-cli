@@ -220,7 +220,7 @@ def monitor_queue(location, queue_item, timeout_seconds = 30, interval_seconds =
 # Main entry point
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: jk list | build <job_name>")
+        print("\nUsage: 'jk ls' (or 'jk list')\n")
     elif sys.argv[1] in ["ls","list"] and len(sys.argv) == 3 and sys.argv[2] == "jenkins":
         list_jenkins()
     elif sys.argv[1] in ["ls","list"]:
