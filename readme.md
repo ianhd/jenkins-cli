@@ -16,9 +16,9 @@ pip install -r requirements.txt
 Create your own `.env` file. Look at `.env.example` for a template with examples.
 
 ## Running the Jenkins CLI
-Add `c:\Path\To\Your\jenkins-cli` to your PATH environment variable. You may need to restart your terminal for this to take effect.
+Add `c:\Path\To\Your\jenkins-cli` to PATH. You may need to restart your command-line terminal for this to take effect.
 
-In a command-line terminal, run this command:
+Then, run this command:
 
 ```
 jk
