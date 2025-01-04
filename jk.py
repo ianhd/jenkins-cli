@@ -1,5 +1,4 @@
 # run 'pipreqs . --force' to update requirements.txt (then remove version #'s?)
-# ask the user in readme.md to run 'pip install -r requirements.txt' command to get all pip libraries
 
 import requests
 import os
@@ -12,7 +11,9 @@ from helpers.env_validator import validate_and_load_env
 from utils.env_functions import upsert_env_var
 from utils.env_functions import del_env_var
 
-validate_and_load_env()
+script_dir = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(script_dir, '.env')    
+validate_and_load_env(env_path)
 
 colorama_init()
 

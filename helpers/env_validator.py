@@ -1,15 +1,13 @@
 import os
 from dotenv import load_dotenv
 
-def validate_and_load_env():
-    env_path = ".env"
-
+def validate_and_load_env(env_path):
     # Check if the .env file exists
     if not os.path.exists(env_path):
         print("\nOops. Please create a .env file. Look at .env.example as a template.\n")
         exit()
 
-    load_dotenv()
+    load_dotenv(env_path)
 
     # Make sure required env variables are there
     env_keys_csv = 'AVAILABLE_JENKINS_INSTANCES,JENKINS_INSTANCE'
