@@ -1,5 +1,5 @@
-# Jenkins CLI
-Jenkins CLI is a command-line interface for deploying jobs in your Jenkins instances.
+# Jenkins CLI for Windows
+Jenkins CLI for Windows is a command-line interface for deploying jobs in your Jenkins instances.
 
 ## Installation
 Jenkins CLI requires [Python](https://www.python.org/) to run.
