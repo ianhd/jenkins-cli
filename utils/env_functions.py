@@ -1,6 +1,6 @@
-def upsert_env_var(key, value):
+def upsert_env_var(key, value, env_path):
     # Open the .env file in read mode to fetch all lines
-    with open('.env', 'r') as file:
+    with open(env_path, 'r') as file:
         lines = file.readlines()
     
     # Check if the key already exists in the file
@@ -16,17 +16,17 @@ def upsert_env_var(key, value):
         lines.append(f"{key}={value}\n")
     
     # Write the updated content back to the .env file
-    with open('.env', 'w') as file:
+    with open(env_path, 'w') as file:
         file.writelines(lines)
         
-def del_env_var(key):
+def del_env_var(key, env_path):
     # Open the .env file in read mode to fetch all lines
-    with open('.env', 'r') as file:
+    with open(env_path, 'r') as file:
         lines = file.readlines()
     
     # Filter out the line that starts with the key
     lines = [line for line in lines if not line.startswith(key + "=")]
     
     # Write the updated content back to the .env file
-    with open('.env', 'w') as file:
+    with open(env_path, 'w') as file:
         file.writelines(lines)

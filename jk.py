@@ -32,12 +32,12 @@ JENKINS_URL = f"{jenkins_base_url}/{job_or_view}/{parent}" # point to a parent
 AUTH = (username, api_token)
 
 def set_parent(new_parent):
-    upsert_env_var("PARENT", new_parent)
+    upsert_env_var("PARENT", new_parent, env_path)
     print(f"\n✔  parent is now set to '{new_parent}'.\n")        
     
 def set_jenkins(new_jenkins):
-    upsert_env_var("JENKINS_INSTANCE", new_jenkins)
-    del_env_var("PARENT")
+    upsert_env_var("JENKINS_INSTANCE", new_jenkins, env_path)
+    del_env_var("PARENT", env_path)
     print(f"\n✔  jenkins instance is now set to {Fore.GREEN}{new_jenkins}{Style.RESET_ALL}; parent is cleared.\n")        
 
 def clear_screen():
