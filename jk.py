@@ -160,7 +160,7 @@ def monitor_build(location, build_number):
             result = data.get("result")
             if result == "FAILURE":
                 failure_reason = get_failure_reason(data)
-                print(f"\n\n🤦‍♂️ build failed. Reason: {failure_reason}.\n")
+                print(f"\n\n⁉ build failed. Reason: {failure_reason}.\n")
                 exit()
             elif result == "SUCCESS":
                 print("\n\n🙌 build succeeded!\n")
