@@ -127,13 +127,6 @@ def trigger_build(job_name):
         print()
         print(f"Failed to trigger build. Status code: {response.status_code}")
 
-def get_failure_reason(data):
-    for action in data.get("actions", []):
-        if "causes" in action:
-            causes = action["causes"]
-            return ", ".join(cause.get("shortDescription", "Unknown cause") for cause in causes)
-    return "Unknown reason"
-
 def render_progress_bar(percentage, width=50):
     completed = int(width * percentage / 100)
     remaining = width - completed
@@ -142,11 +135,13 @@ def render_progress_bar(percentage, width=50):
 
 # git push test
 
-def monitor_build(location, build_number):
+def monitor_build(location):
     print(f"⏳ monitoring build status from {location}")
     
     api_url = f"{location}api/json"
-    
+
+    more_info_url = re.sub(r'/\d+/$', '/', location)
+
     print()
     
     while True:
@@ -159,8 +154,7 @@ def monitor_build(location, build_number):
             # Check the final result of the build
             result = data.get("result")
             if result == "FAILURE":
-                failure_reason = get_failure_reason(data)
-                print(f"\n\n⁉ build failed. Reason: {failure_reason}.\n")
+                print(f"\n\n😡 build failed. More details here: {more_info_url}\n")
                 exit()
             elif result == "SUCCESS":
                 print("\n\n🙌 build succeeded!\n")
@@ -202,9 +196,8 @@ def monitor_queue(location, queue_item, timeout_seconds = 30, interval_seconds =
 
             # Check if the desired data exists in the response
             if "executable" in data and "number" in data["executable"]:
-                build_number = data["executable"]["number"]
                 build_url = data["executable"].get("url", "URL not available")
-                monitor_build(build_url, build_number)
+                monitor_build(build_url)
             else:
                 why = data["why"]
                 #print(f"Build # is not available yet; {why}.")
