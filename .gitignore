@@ -5,6 +5,8 @@ __pycache__/
 # Environment files
 .env
 
+jk.bat
+
 # Virtual environment
 venv/
 *.venv/

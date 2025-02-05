@@ -1,0 +1,2 @@
+@echo off
+python "C:\Path\To\Your\jk.py" %*
