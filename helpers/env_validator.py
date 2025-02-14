@@ -10,7 +10,7 @@ def validate_and_load_env(env_path):
     load_dotenv(env_path)
 
     # Make sure required env variables are there
-    env_keys_csv = 'AVAILABLE_JENKINS_INSTANCES,JENKINS_INSTANCE'
+    env_keys_csv = 'JENKINS_BASE_URL_1,JENKINS_API_TOKEN_1,JENKINS_USERNAME_1'
     env_keys = env_keys_csv.split(',')
     missing = [key for key in env_keys if not os.getenv(key)]
     if missing:
