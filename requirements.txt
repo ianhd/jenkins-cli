@@ -1,4 +1,4 @@
-colorama==0.4.6
+InquirerPy==0.3.4
 python-dotenv==1.0.1
 Requests==2.32.3
-tabulate==0.9.0
+rich==13.9.4

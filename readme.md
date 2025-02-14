@@ -7,10 +7,8 @@ Jenkins CLI requires [Python](https://www.python.org/) to run.
 Clone this repo; install the dependencies:
 
 ```
-mkdir jenkins-cli
-cd jenkins-cli
-git clone https://github.com/ianhd/jenkins-cli.git .
-pip install colorama python-dotenv Requests tabulate
+git clone https://github.com/ianhd/jenkins-cli.git
+pip install python-dotenv Requests InquirerPy rich
 ```
 
 Create your own `.env` file. Look at `.env.example` for a template with examples.
