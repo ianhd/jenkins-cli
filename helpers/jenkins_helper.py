@@ -11,14 +11,14 @@ def search_jenkins(jenkins_instances, search_term):
     search_term = search_term.lower()  # Make search case-insensitive
     results = []
 
-    def search_items(items):
+    def search_items(jenkins, items):
         """ Recursively search items (views or jobs) and collect matches as SearchResult instances. """
         for item in items:
             name = item["name"]
             item_type = item["_class"]
             url = item["url"]
-            username = item.get("username","")
-            api_token = item.get("api_token","")
+            username = jenkins.username
+            api_token = jenkins.api_token
             if search_term in name.lower():
                 results.append(SearchResult(item_type, name, url, username, api_token))
                 if "views" in item:
@@ -29,20 +29,20 @@ def search_jenkins(jenkins_instances, search_term):
                         results.append(SearchResult(job["_class"], job["name"], job["url"], username, api_token))
             else:
                 if "views" in item:
-                    search_items(item["views"])
+                    search_items(jenkins, item["views"])
                 if "jobs" in item:
-                    search_items(item["jobs"])
+                    search_items(jenkins, item["jobs"])
 
     for jenkins in jenkins_instances:
         views = get_jenkins_views(jenkins)
-        search_items(views)
+        search_items(jenkins, views)
         jobs = get_jenkins_jobs(jenkins)
-        search_items(jobs)
+        search_items(jenkins, jobs)
 
     workflow_jobs = [result for result in results if result.result_type == "WorkflowJob"]
 
     if results:
-        print(f"[bold cyan]*** Search Results for {search_term}***[/bold cyan]")
+        print(f"[bold cyan]*** Search Results for {search_term} ***[/bold cyan]")
         choices = [str(workflow_jb) for workflow_jb in workflow_jobs]
         choices.append("Cancel")
 
@@ -192,10 +192,6 @@ def get_jenkins_views(jenkins):
     response.raise_for_status()
     data = response.json().get("views", [])
 
-    for item in data:
-        item["username"] = jenkins.username
-        item["api_token"] = jenkins.api_token
-
     return data
 
 def get_jenkins_jobs(jenkins):
@@ -203,9 +199,5 @@ def get_jenkins_jobs(jenkins):
     response = requests.get(url, auth=(jenkins.username, jenkins.api_token))
     response.raise_for_status()
     data = response.json().get("jobs", [])
-
-    for item in data:
-        item["username"] = jenkins.username
-        item["api_token"] = jenkins.api_token
 
     return data
