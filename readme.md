@@ -8,7 +8,7 @@ Clone this repo; install the dependencies:
 
 ```
 git clone https://github.com/ianhd/jenkins-cli.git
-pip install python-dotenv Requests InquirerPy rich
+python -m pip install python-dotenv Requests InquirerPy rich
 ```
 
 Create your own `.env` file. Look at `.env.example` for a template with examples.
