@@ -45,7 +45,10 @@ def search_jenkins(jenkins_instances, search_term):
         print(f"[bold cyan]*** Search Results for {search_term} ***[/bold cyan]")
         choices = [str(workflow_jb) for workflow_jb in workflow_jobs]
         choices.append("Cancel")
-
+    else:
+        print("[bold red]No results found.[/bold red]")
+        return        
+    
     try:
         selected = inquirer.select(
             message="Select a result or cancel:",
@@ -254,9 +257,10 @@ def get_jenkins_views(jenkins):
     return data
 
 def get_jenkins_jobs(jenkins):
-    url = f"{jenkins.base_url}/api/json?tree=jobs[name,_class,url,jobs[name,_class,url,jobs[*]]]"
+    url = f"{jenkins.base_url}/api/json?tree=jobs[color,name,_class,url,jobs[name,_class,url,jobs[*]]]"
     response = requests.get(url, auth=(jenkins.username, jenkins.api_token))
     response.raise_for_status()
-    data = response.json().get("jobs", [])
+    jobs = response.json().get("jobs", [])
 
-    return data
+    filtered_jobs = [job for job in jobs if job.get("color") != "disabled"]
+    return filtered_jobs
