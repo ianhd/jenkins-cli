@@ -70,39 +70,98 @@ def search_jenkins(jenkins_instances, search_term):
         answers = prompt(confirm_questions)
         answer = answers['confirm']
         if answer:
-            trigger_build(selected_result.url, selected_result.username, selected_result.api_token)
+            # does this job have a REPO_BRANCH build argument specified?
+            repo_branch = get_repo_branch(selected_result.url, selected_result.username, selected_result.api_token)            
+            if repo_branch:
+                repo_branch = inquirer.text(
+                    message="Which branch?",
+                    default=repo_branch,
+                ).execute()
+
+            # params = get_job_parameters(selected_result.url, selected_result.username, selected_result.api_token)
+            # for key, value in params.items():
+            #     print(f"[bold cyan]{key}[/bold cyan]: {value}")
+
+            trigger_build(selected_result.url, selected_result.username, selected_result.api_token, repo_branch)
         else:
             print("Operation was canceled.")
             return
-        # print(f"Your answer: {answers['confirm']}")        
     except KeyboardInterrupt:
         print("[bold red]Search operation was canceled.[/bold red]")
         return
 
-# Function to trigger a build with parameters
-def trigger_build(job_url, username, api_token):
+# Function to get all job build arguments aka parameters
+def get_repo_branch(job_url, username, api_token):
     auth = (username, api_token)
+    url = f"{job_url}api/json?tree=property[parameterDefinitions[defaultParameterValue[value]]]"
+    response = requests.get(url, auth=auth)
+    response.raise_for_status()
+    data = response.json()
+
+    for prop in data.get("property", []):
+        if prop.get("_class") == "hudson.model.ParametersDefinitionProperty":
+            for param in prop.get("parameterDefinitions", []):
+                value = param.get("defaultParameterValue", {}).get("value", "")
+                if isinstance(value, str):
+                    lines = value.strip().splitlines()
+                    for line in lines:
+                        if line.startswith("REPO_BRANCH="):
+                            return line.split("=", 1)[1]
+    return None  # Not found
+
+def get_job_parameters(job_url, username, api_token):
+    auth = (username, api_token)
+    url = f"{job_url}api/json?tree=property[parameterDefinitions[defaultParameterValue[value]]]"
+    response = requests.get(url, auth=auth)
+    response.raise_for_status()
+    data = response.json()
+
+    parameters = {}
+
+    for prop in data.get("property", []):
+        param_defs = prop.get("parameterDefinitions")
+        if not param_defs:
+            continue
+
+        for param in param_defs:
+            default_value = param.get("defaultParameterValue", {}).get("value", "")
+            if isinstance(default_value, str):
+                # Parse the multiline string into key=value pairs
+                for line in default_value.splitlines():
+                    if "=" in line:
+                        key, value = line.split("=", 1)
+                        parameters[key.strip()] = value.strip()
+                return parameters  # assume there's only one such param block
+    return parameters
+
+# Function to trigger a build with parameters
+def trigger_build(job_url, username, api_token, override_branch=None):
+    auth = (username, api_token)
+
+    # Get the parameters
+    parameters = get_job_parameters(job_url, username, api_token)
+
+    # Apply override if provided
+    if override_branch:
+        parameters["REPO_BRANCH"] = override_branch
+
+    # Create args string: KEY=VALUE\nKEY2=VALUE2...
+    args_value = "\n".join(f"{k}={v}" for k, v in parameters.items())
+
+    # Trigger build
     job_url = f"{job_url}buildWithParameters"
-    
-    # Make the POST request to trigger the build
-    response = requests.post(job_url, auth=auth)
-    
-    # Check for a successful response (status code 201 indicates success)
+    response = requests.post(job_url, auth=auth, params={"args": args_value})
+
     if response.status_code == 201:
-        print()
-        print("✔  build triggered successfully.")
-        
-        # Print out the Location header from the response
+        print("\n✔  build triggered successfully.")
         location = response.headers.get('Location')
         if location:
-            # Extract the integer at the end of the string
             queue_item = int(re.findall(r"/(\d+)/$", location)[0])
             monitor_queue(location, queue_item, auth)
         else:
             print("Location header not found in the response.")
     else:
-        print()
-        print(f"Failed to trigger build. Status code: {response.status_code}")
+        print(f"\nFailed to trigger build. Status code: {response.status_code}")
 
 def render_progress_bar(percentage, width=50):
     completed = int(width * percentage / 100)

@@ -13,3 +13,5 @@ venv/
 
 # Other
 .DS_Store
+
+launch.json
