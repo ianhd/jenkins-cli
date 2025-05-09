@@ -192,6 +192,10 @@ def monitor_build(location, auth):
             commits = get_build_changes(api_url, auth)
             if commits:
                 printed_commits = True
+                
+                # clear the previous progress bar so it does not get displayed twice
+                clear_last_line()
+
                 print("\n📦 Commits for this build:")
                 for c in commits:
                     short = (c["id"] or "")[:7]
@@ -314,3 +318,9 @@ def get_build_changes(build_url, auth):
                 })
 
     return commits
+
+def clear_last_line():
+    # ANSI: move cursor up one line, then clear that line
+    sys.stdout.write('\033[F')    # cursor up
+    sys.stdout.write('\r\033[K')  # carriage return + erase to end
+    sys.stdout.flush()
