@@ -180,12 +180,30 @@ def monitor_build(location, auth):
     more_info_url = re.sub(r'/\d+/$', '/', location)
 
     print()
-    
+    printed_commits = False
+
     while True:
         response = requests.get(api_url, auth=auth)
         response.raise_for_status()
         
         data = response.json()
+
+        if data.get("building") and not printed_commits:
+            commits = get_build_changes(api_url, auth)
+            if commits:
+                printed_commits = True
+                
+                # clear the previous progress bar so it does not get displayed twice
+                clear_last_line()
+
+                print("\n📦 Commits for this build:")
+                for c in commits:
+                    short = (c["id"] or "")[:7]
+                    msg   = c["msg"].splitlines()[0]
+                    author= c["author"] or "unknown"
+                    print(f"  • {short} — {msg} (by {author})")
+                print()
+
         
         if not data.get("building"):
             # Check the final result of the build
@@ -264,3 +282,45 @@ def get_jenkins_jobs(jenkins):
 
     filtered_jobs = [job for job in jobs if job.get("color") != "disabled"]
     return filtered_jobs
+
+def get_build_changes(build_url, auth):
+    """
+    Fetches the list of commits that went into the given Jenkins build.
+    Returns:
+      List[dict]: each dict has keys "id", "author", "msg".
+    """
+    if not build_url.endswith('/'):
+        build_url += '/'
+
+    # Request both the plural and singular change-set blocks so we cover all job types:
+    #   changeSets[items[commitId,msg,author[fullName]]]
+    #     – the plural changeSets block that Pipeline/Multibranch jobs populate
+    #   changeSet[items[commitId,msg,author[fullName]]]
+    #     – the singular changeSet block that freestyle jobs (and some older workflows) use
+    api_url = (
+        f"{build_url}api/json?"
+        "tree=changeSets[items[commitId,msg,author[fullName]]],"
+        "changeSet[items[commitId,msg,author[fullName]]]"
+    )
+
+    resp = requests.get(api_url, auth=auth)
+    resp.raise_for_status()
+    data = resp.json()
+
+    commits = []
+    for section in ("changeSets", "changeSet"):
+        for cs in data.get(section, []):
+            for item in cs.get("items", []):
+                commits.append({
+                    "id":     item.get("commitId"),
+                    "author": item.get("author", {}).get("fullName"),
+                    "msg":    item.get("msg", "").strip()
+                })
+
+    return commits
+
+def clear_last_line():
+    # ANSI: move cursor up one line, then clear that line
+    sys.stdout.write('\033[F')    # cursor up
+    sys.stdout.write('\r\033[K')  # carriage return + erase to end
+    sys.stdout.flush()
